@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Login or Register</h1>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="#" id="registerLink">Register here</a></p>
+    </div>
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2PNyIj9BKiq8gh7aKaJ9a0S7btAB64Ns",
+            authDomain: "share-2f2c8.firebaseapp.com",
+            projectId: "share-2f2c8",
+            storageBucket: "share-2f2c8.firebasestorage.app",
+            messagingSenderId: "614151650069",
+            appId: "1:614151650069:web:8ead2cc41fda087455071c",
+            measurementId: "G-H2XYGNJS9R"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Handle login form submission
+        const loginForm = document.getElementById('loginForm');
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Validate the inputs
+            if (!email || !password) {
+                alert("Please enter both email and password.");
+                return;
+            }
+
+            console.log("Attempting login with email: ", email);
+
+            // Firebase login logic
+            signInWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    const user = userCredential.user;
+                    if (user.emailVerified) {
+                        // Redirect to OTP page if email is verified
+                        window.location.href = '/otp.html';
+                    } else {
+                        alert('Please verify your email before logging in.');
+                    }
+                })
+                .catch(error => {
+                    console.error("Error during sign-in: ", error.message);
+                    alert("Error: " + error.message);
+                });
+        });
+
+        // Register link handler
+        document.getElementById('registerLink').addEventListener('click', () => {
+            const email = prompt("Enter your email:");
+            const password = prompt("Enter a password:");
+
+            // Register user
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    alert("Registration successful! Please log in.");
+                })
+                .catch(error => {
+                    console.error("Error during registration: ", error.message);
+                    alert("Error: " + error.message);
+                });
+        });
+    </script>
+</body>
+</html>

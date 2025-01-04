@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verified</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Your email has been verified</h2>
+        <input type="button" value="OK" onclick="redirectToDashboard()">
+    </div>
+
+    <script type="module">
+        import { getAuth, isSignInWithEmailLink, applyActionCode } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2PNyIj9BKiq8gh7aKaJ9a0S7btAB64Ns",
+            authDomain: "share-2f2c8.firebaseapp.com",
+            projectId: "share-2f2c8",
+            storageBucket: "share-2f2c8.firebasestorage.app",
+            messagingSenderId: "614151650069",
+            appId: "1:614151650069:web:8ead2cc41fda087455071c",
+            measurementId: "G-H2XYGNJS9R"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Check if the email link is valid
+        if (isSignInWithEmailLink(auth, window.location.href)) {
+            const email = window.localStorage.getItem('emailForSignIn');
+            if (email) {
+                // Complete the email verification
+                applyActionCode(auth, window.location.search)
+                    .then(() => {
+                        // Successfully verified the email
+                        console.log('Email verified successfully!');
+                    })
+                    .catch((error) => {
+                        // Handle any errors that occur during verification
+                        console.error('Error verifying email:', error.message);
+                    });
+            }
+        }
+
+        // Make the redirect function accessible globally
+        window.redirectToDashboard = function() {
+            console.log("Redirecting to dashboard...");
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

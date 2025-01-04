@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Dashboard</h1>
+        <div class="button-container">
+            <button id="upload-doc">Upload Document</button>
+            <button id="delete-doc">Delete Document</button>
+            <button id="share-doc">Share Document</button>
+            <button id="my-profile">My Profile</button>
+            <button id="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        // Select elements
+        const uploadBtn = document.getElementById('upload-doc');
+        const updateBtn = document.getElementById('delete-doc');
+        const shareBtn = document.getElementById('share-doc');
+        const profileBtn = document.getElementById('my-profile');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Function to load files from localStorage
+        function loadFiles() {
+            let files = JSON.parse(localStorage.getItem('files')) || [];
+            return files;
+        }
+
+        // Function to save files to localStorage
+        function saveFiles(files) {
+            localStorage.setItem('files', JSON.stringify(files));
+        }
+
+        // Upload Document
+        uploadBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/pdf, .doc, .docx';
+            input.multiple = true;
+            input.click();
+
+            input.addEventListener('change', () => {
+                const files = input.files;
+                if (files.length > 0) {
+                    let storedFiles = loadFiles();
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const fileData = {
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            content: file
+                        };
+                        storedFiles.push(fileData);
+                    }
+                    saveFiles(storedFiles);
+                    alert('Files uploaded successfully!');
+                }
+            });
+        });
+
+        // Update Document
+        updateBtn.addEventListener('click', () => {
+            let storedFiles = loadFiles();
+            if (storedFiles.length === 0) {
+                alert('No documents to delete');
+                return;
+            }
+
+            let fileNames = storedFiles.map(file => file.name).join('\n');
+            let fileName = prompt(`Select file to delete:\n${fileNames}`);
+
+            let fileIndex = storedFiles.findIndex(file => file.name === fileName);
+            if (fileIndex !== -1) {
+                const action = prompt('Enter "delete" to delete:');
+                if (action === 'delete') {
+                    storedFiles.splice(fileIndex, 1);
+                    saveFiles(storedFiles);
+                    alert(`${fileName} deleted successfully!`);
+                } else {
+                    alert('Invalid action.');
+                }
+            } else {
+                alert('File not found!');
+            }
+        });
+
+        // Share Document
+        shareBtn.addEventListener('click', () => {
+            const email = prompt('Enter the email to share the document with:');
+            if (email) {
+                let storedFiles = loadFiles();
+                if (storedFiles.length === 0) {
+                    alert('No documents to share');
+                    return;
+                }
+
+                let fileNames = storedFiles.map(file => file.name).join('\n');
+                let fileName = prompt(`Select file to share:\n${fileNames}`);
+                let fileToShare = storedFiles.find(file => file.name === fileName);
+
+                if (fileToShare) {
+                    const subject = "Document Share";
+                    const body = `Hello,\n\nI am sharing the document with you: ${fileToShare.name}\n\nBest regards,`;
+
+                    // Open the user's email client with the "mailto" link
+                    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                    alert(`Document ${fileToShare.name} shared with ${email} (simulated).`);
+                } else {
+                    alert('File not found!');
+                }
+            }
+        });
+
+        // My Profile
+        profileBtn.addEventListener('click', () => {
+            window.location.href = 'profile.html'; // Redirect to profile.html
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            window.location.href = 'login.html'; // Redirect to login.html
+        });
+    </script>
+</body>
+</html>

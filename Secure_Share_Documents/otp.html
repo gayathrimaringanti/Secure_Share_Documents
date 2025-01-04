@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Verify Your Email</h2>
+        <input type="email" id="email" placeholder="Enter your email" required>
+        <input type="button" value="Send Verification Link" onclick="sendVerificationLink()">
+        <div id="message" class="message"></div>
+    </div>
+
+    <!-- Firebase SDK v9 imports (modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js";
+        import { getAuth, sendEmailVerification, fetchSignInMethodsForEmail, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2PNyIj9BKiq8gh7aKaJ9a0S7btAB64Ns",
+            authDomain: "share-2f2c8.firebaseapp.com",
+            projectId: "share-2f2c8",
+            storageBucket: "share-2f2c8.firebasestorage.app",
+            messagingSenderId: "614151650069",
+            appId: "1:614151650069:web:8ead2cc41fda087455071c",
+            measurementId: "G-H2XYGNJS9R"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        window.sendVerificationLink = function() {
+            const email = document.getElementById('email').value;
+            if (email === '') {
+                alert('Please enter an email address.');
+                return;
+            }
+
+            // Check if the email is already registered
+            fetchSignInMethodsForEmail(auth, email)
+                .then((signInMethods) => {
+                    if (signInMethods.length > 0) {
+                        // Email already in use, redirect to verify.html page
+                        window.location.href = "verify.html?email=" + encodeURIComponent(email);
+                    } else {
+                        // If the email is not registered, create new user
+                        createUserWithEmailAndPassword(auth, email, 'temporaryPassword123')
+                            .then((userCredential) => {
+                                const user = userCredential.user;
+                                // Send verification email
+                                sendEmailVerification(user)
+                                    .then(() => {
+                                        document.getElementById('message').innerText = 'Verification link sent! Please check your email.';
+                                    })
+                                    .catch((error) => {
+                                        const errorMessage = error.message;
+                                        document.getElementById('message').innerText = `Error: ${errorMessage}`;
+                                    });
+                            })
+                            .catch((error) => {
+                                const errorMessage = error.message;
+                                if (errorMessage.includes("auth/email-already-in-use")) {
+                                    // If email already in use, redirect to verify.html page
+                                    window.location.href = "verify.html?email=" + encodeURIComponent(email);
+                                } else {
+                                    document.getElementById('message').innerText = `Error: ${errorMessage}`;
+                                }
+                            });
+                    }
+                })
+                .catch((error) => {
+                    document.getElementById('message').innerText = `Error: ${error.message}`;
+                });
+        };
+    </script>
+</body>
+</html>
